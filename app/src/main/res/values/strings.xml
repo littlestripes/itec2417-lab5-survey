@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">YesNoQuiz</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="reset">Reset</string>
+    <string name="question_handstand">Can you do a handstand?</string>
+    <string name="question_space">Would you like to go to space?</string>
+</resources>
