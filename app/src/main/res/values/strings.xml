@@ -5,4 +5,7 @@
     <string name="reset">Reset</string>
     <string name="question_handstand">Can you do a handstand?</string>
     <string name="question_space">Would you like to go to space?</string>
+    <string name="result">Result</string>
+    <string name="results">Results</string>
+    <string name="continue_survey">Continue survey</string>
 </resources>
