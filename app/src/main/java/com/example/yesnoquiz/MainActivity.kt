@@ -1,35 +1,22 @@
 package com.example.yesnoquiz
 
-import android.content.Intent
 import android.os.Bundle
-import android.util.Log
-import android.widget.Button
+import android.view.View
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.ActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ViewModelProvider
-
-private const val TAG = "MainActivity"
-const val EXTRA_YES_RESULT = "com.example.yesnoquiz.YES_RESULT"
-const val EXTRA_NO_RESULT = "com.example.yesnoquiz.NO_RESULT"
-const val EXTRA_MUST_RESET = "com.example.yesnoquiz.MUST_RESET"
+import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class MainActivity : AppCompatActivity() {
 
-    private val surveyResultResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        result -> handleActivityResult(result)
-    }
+    private lateinit var containerView: View
+    private lateinit var bottomNavigationView: BottomNavigationView
 
-    private val voteTallyViewModel: VoteTallyViewModel by lazy {
+    val voteTallyViewModel: VoteTallyViewModel by lazy {
         ViewModelProvider(this).get(VoteTallyViewModel::class.java)
     }
-
-    lateinit private var yesButton: Button
-    lateinit private var noButton: Button
-    lateinit private var resultButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,42 +28,42 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        yesButton = findViewById(R.id.yes_button)
-        noButton = findViewById(R.id.no_button)
-        resultButton = findViewById(R.id.result_button)
+        containerView = findViewById(R.id.fragment_container)
+        bottomNavigationView = findViewById(R.id.bottomNavigationView)
 
-        yesButton.setOnClickListener {
-            voteTallyViewModel.incrementYesVotes()
-            Log.d(TAG, "New yes count: ${voteTallyViewModel.getYesVotes()}")
-        }
-
-        noButton.setOnClickListener {
-            voteTallyViewModel.incrementNoVotes()
-            Log.d(TAG, "New no count: ${voteTallyViewModel.getNoVotes()}")
-        }
-
-        resultButton.setOnClickListener {
-            showResults()
-        }
-    }
-
-    private fun showResults() {
-        Intent(this, SurveyResultActivity::class.java).apply {
-            // "sending" the yes and no vote tallies over to SurveyResultActivity
-            putExtra(EXTRA_YES_RESULT, voteTallyViewModel.getYesVotes())
-            putExtra(EXTRA_NO_RESULT, voteTallyViewModel.getNoVotes())
-            surveyResultResultLauncher.launch(this)
+        bottomNavigationView.setOnItemSelectedListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.show_vote -> {
+                    showFragment("VOTE")
+                    true
+                }
+                R.id.show_results -> {
+                    showFragment("RESULTS")
+                    true
+                }
+                else -> {
+                    false
+                }
+            }
         }
     }
 
-    private fun handleActivityResult(result: ActivityResult) {
-        if (result.resultCode == RESULT_OK) {
-            val intent = result.data
-            val mustReset = intent?.getBooleanExtra(EXTRA_MUST_RESET, false) ?: false
-            if (mustReset) {
-                // if the user pressed the Reset button in SurveyResultActivity, the vote tallies
-                // will be reset here
-                voteTallyViewModel.resetVotes()
+    private fun showFragment(tag: String) {
+        // is the fragment with given tag NOT on screen?
+        if (supportFragmentManager.findFragmentByTag(tag) == null) {
+            when (tag) {
+                "VOTE" -> {
+                    // display the voting interface
+                    supportFragmentManager.beginTransaction()
+                        .replace(R.id.fragment_container, VoteFragment.newInstance(), "VOTE")
+                        .commit()
+                }
+                "RESULTS" -> {
+                    // display the results
+                    supportFragmentManager.beginTransaction()
+                        .replace(R.id.fragment_container, ResultsFragment.newInstance(), "RESULTS")
+                        .commit()
+                }
             }
         }
     }
